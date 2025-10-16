@@ -1,0 +1,60 @@
+@LojaPesca.API_HostAddress = http://localhost:5046
+
+### Get all products
+GET {{LojaPesca.API_HostAddress}}/api/products
+Accept: application/json
+
+###
+
+### Get product by ID
+GET {{LojaPesca.API_HostAddress}}/api/products/{{productId}}
+Accept: application/json
+
+###
+
+### Get products by category
+GET {{LojaPesca.API_HostAddress}}/api/products/category/Varas
+Accept: application/json
+
+###
+
+### Search products by name
+GET {{LojaPesca.API_HostAddress}}/api/products/search?name=Vara
+Accept: application/json
+
+###
+
+### Create a new product
+POST {{LojaPesca.API_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+  "name": "Vara de Pesca Profissional",
+  "description": "Vara de pesca de fibra de carbono",
+  "price": 299.90,
+  "stock": 15,
+  "category": "Varas",
+  "imageUrl": "https://example.com/vara.jpg"
+}
+
+###
+
+### Update a product
+PUT {{LojaPesca.API_HostAddress}}/api/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Vara de Pesca Atualizada",
+  "description": "Vara de pesca de fibra de carbono atualizada",
+  "price": 349.90,
+  "stock": 20,
+  "category": "Varas",
+  "imageUrl": "https://example.com/vara-updated.jpg"
+}
+
+###
+
+### Delete a product
+DELETE {{LojaPesca.API_HostAddress}}/api/products/{{productId}}
+
+###
