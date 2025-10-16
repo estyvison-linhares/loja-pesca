@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using LojaPesca.Domain.Entities;
 using LojaPesca.Domain.Interfaces;
 
@@ -5,55 +6,56 @@ namespace LojaPesca.Infrastructure.Repositories;
 
 public class InMemoryProductRepository : IProductRepository
 {
-    private readonly List<Product> _products = new();
+    private readonly ConcurrentDictionary<Guid, Product> _products = new();
 
     public Task<Product?> GetByIdAsync(Guid id)
     {
-        var product = _products.FirstOrDefault(p => p.Id == id);
+        _products.TryGetValue(id, out var product);
         return Task.FromResult(product);
     }
 
     public Task<IEnumerable<Product>> GetAllAsync()
     {
-        return Task.FromResult<IEnumerable<Product>>(_products);
+        return Task.FromResult<IEnumerable<Product>>(_products.Values);
     }
 
     public Task<IEnumerable<Product>> GetByCategoryAsync(string category)
     {
-        var products = _products.Where(p => p.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            return Task.FromResult<IEnumerable<Product>>(Array.Empty<Product>());
+        }
+        
+        var products = _products.Values.Where(p => p.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
         return Task.FromResult<IEnumerable<Product>>(products);
     }
 
     public Task<IEnumerable<Product>> SearchByNameAsync(string name)
     {
-        var products = _products.Where(p => p.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Task.FromResult<IEnumerable<Product>>(Array.Empty<Product>());
+        }
+        
+        var products = _products.Values.Where(p => p.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
         return Task.FromResult<IEnumerable<Product>>(products);
     }
 
     public Task<Product> AddAsync(Product entity)
     {
-        _products.Add(entity);
+        _products.TryAdd(entity.Id, entity);
         return Task.FromResult(entity);
     }
 
     public Task UpdateAsync(Product entity)
     {
-        var existingProduct = _products.FirstOrDefault(p => p.Id == entity.Id);
-        if (existingProduct != null)
-        {
-            var index = _products.IndexOf(existingProduct);
-            _products[index] = entity;
-        }
+        _products.AddOrUpdate(entity.Id, entity, (key, oldValue) => entity);
         return Task.CompletedTask;
     }
 
     public Task DeleteAsync(Guid id)
     {
-        var product = _products.FirstOrDefault(p => p.Id == id);
-        if (product != null)
-        {
-            _products.Remove(product);
-        }
+        _products.TryRemove(id, out _);
         return Task.CompletedTask;
     }
 }

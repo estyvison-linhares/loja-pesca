@@ -1,4 +1,5 @@
 using LojaPesca.Application.DTOs;
+using LojaPesca.Application.Exceptions;
 using LojaPesca.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,6 +44,11 @@ public class ProductsController : ControllerBase
     [HttpGet("search")]
     public async Task<ActionResult<IEnumerable<ProductDto>>> Search([FromQuery] string name)
     {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return BadRequest("Search name parameter cannot be empty.");
+        }
+
         var products = await _productService.SearchProductsByNameAsync(name);
         return Ok(products);
     }
@@ -62,7 +68,7 @@ public class ProductsController : ControllerBase
             await _productService.UpdateProductAsync(id, productDto);
             return NoContent();
         }
-        catch (Exception ex)
+        catch (NotFoundException ex)
         {
             return NotFound(ex.Message);
         }

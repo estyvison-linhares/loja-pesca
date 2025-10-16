@@ -1,4 +1,5 @@
 using LojaPesca.Application.DTOs;
+using LojaPesca.Application.Exceptions;
 using LojaPesca.Application.Interfaces;
 using LojaPesca.Domain.Entities;
 using LojaPesca.Domain.Interfaces;
@@ -61,7 +62,7 @@ public class ProductService : IProductService
         var product = await _productRepository.GetByIdAsync(id);
         if (product == null)
         {
-            throw new Exception($"Product with ID {id} not found.");
+            throw new NotFoundException($"Product with ID {id} not found.");
         }
 
         product.Name = productDto.Name;
