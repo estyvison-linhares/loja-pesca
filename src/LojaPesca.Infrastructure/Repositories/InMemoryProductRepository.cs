@@ -43,13 +43,16 @@ public class InMemoryProductRepository : IProductRepository
 
     public Task<Product> AddAsync(Product entity)
     {
-        _products.TryAdd(entity.Id, entity);
+        if (!_products.TryAdd(entity.Id, entity))
+        {
+            throw new InvalidOperationException($"Product with ID {entity.Id} already exists.");
+        }
         return Task.FromResult(entity);
     }
 
     public Task UpdateAsync(Product entity)
     {
-        _products.AddOrUpdate(entity.Id, entity, (key, oldValue) => entity);
+        _products[entity.Id] = entity;
         return Task.CompletedTask;
     }
 
